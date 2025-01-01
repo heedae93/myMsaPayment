@@ -1,4 +1,4 @@
-package com.myMsaPayment;
+package com.myMsaPayment.membership;
 
 
 import org.springframework.boot.SpringApplication;

@@ -2,6 +2,11 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.1.0'
     id 'io.spring.dependency-management' version '1.1.0'
+    id 'application' // 추가
+}
+
+application {
+    mainClass = 'com.myMsaPayment.membership.Main' // 정확한 Main 클래스 경로
 }
 
 group = 'com.myMsaPayment'
@@ -18,9 +23,6 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.28'
     testImplementation platform('org.junit:junit-bom:5.9.1')
     testImplementation 'org.junit.jupiter:junit-jupiter'
-}
-dependencies {
-    implementation project(':membership_service')
 }
 
 test {
