@@ -1,10 +1,12 @@
-package com.myMsaPayment.membership;
+package com.myMsaPayment;
 
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
+@ComponentScan(basePackages = "com.myMsaPayment")
 public class MembershipMain {
     public static void main(String[] args) {
         SpringApplication.run(MembershipMain.class, args);

@@ -2,11 +2,15 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.1.0'
     id 'io.spring.dependency-management' version '1.1.0'
-    id 'application' // 추가
+    id 'application'
 }
 
 application {
-    mainClass = 'com.myMsaPayment.membership.Main' // 정확한 Main 클래스 경로
+    mainClass = 'com.myMsaPayment.MembershipMain'
+}
+
+tasks.named('bootJar') {
+    mainClass = 'com.myMsaPayment.MembershipMain'
 }
 
 group = 'com.myMsaPayment'
@@ -19,8 +23,17 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.projectlombok:lombok:1.18.28'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+
+
+
     annotationProcessor 'org.projectlombok:lombok:1.18.28'
+
+    runtimeOnly 'com.h2database:h2:2.2.222'
+
     testImplementation platform('org.junit:junit-bom:5.9.1')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
