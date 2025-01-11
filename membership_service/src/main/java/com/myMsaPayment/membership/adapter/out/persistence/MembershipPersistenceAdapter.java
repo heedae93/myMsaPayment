@@ -1,13 +1,14 @@
 package com.myMsaPayment.membership.adapter.out.persistence;
 
 import com.myMsaPayment.common.PersistenceAdapter;
+import com.myMsaPayment.membership.application.port.out.FindMembershipPort;
 import com.myMsaPayment.membership.application.port.out.RegisterMembershipPort;
 import com.myMsaPayment.membership.domain.Membership;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @PersistenceAdapter
-class MembershipPersistenceAdapter implements RegisterMembershipPort {
+class MembershipPersistenceAdapter implements RegisterMembershipPort, FindMembershipPort {
 
     private final SpringDataMembershipRepository membershipRepository;
 
@@ -29,4 +30,8 @@ class MembershipPersistenceAdapter implements RegisterMembershipPort {
         );
     }
 
+    @Override
+    public MembershipJpaEntity findMembership(Membership.MembershipId membershipId) {
+       return membershipRepository.getReferenceById(Long.parseLong(membershipId.getMembershipId()));
+    }
 }
