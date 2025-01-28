@@ -1,4 +1,4 @@
 rootProject.name = 'myMsaPayment'
 include 'membership_service'
-
+include 'common'
 
