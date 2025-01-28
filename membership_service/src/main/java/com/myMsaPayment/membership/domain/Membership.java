@@ -14,12 +14,13 @@ public class Membership {
     @Getter private final String email;
     @Getter private final String address;
     @Getter private final boolean isValid;
+
     @Getter private final String aggregateIdentifier;
 
 
     public static Membership generateMember(
             MembershipId membershipId, MembershipName membershipName, MembershipEmail membershipEmail, MembershipAddress membershipAddress, MembershipIsValid membershipIsValid,
-            MembershipAggregateIdentifier membershipAggregateIdentifier) {
+             MembershipAggregateIdentifier membershipAggregateIdentifier) {
         return new Membership(
                 membershipId.membershipId,
                 membershipName.nameValue,
