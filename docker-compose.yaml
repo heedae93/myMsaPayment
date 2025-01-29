@@ -1,0 +1,129 @@
+
+services:
+#  zookeeper:
+#    image: 'arm64v8/zookeeper:3.8'
+#    networks:
+#      - myMsaPayment_network
+#    ports:
+#      - '2181:2181'
+#    environment:
+#      - ALLOW_ANONYMOUS_LOGIN=yes
+#      - ZOO_TLS_CLIENT_AUTH=none
+#      - ZOO_TLS_QUORUM_CLIENT_AUTH=none
+
+#  kafka:
+#    image: 'bitnami/kafka:3.4.0'
+#    networks:
+#      - myMsaPayment_network
+#    ports:
+#      - '9092:9092'
+#    environment:
+#      - KAFKA_BROKER_ID=1
+#      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+#      - ALLOW_PLAINTEXT_LISTENER=yes
+#      - KAFKA_CFG_LISTENERS=LC://kafka:29092,LX://kafka:9092
+#      - KAFKA_CFG_ADVERTISED_LISTENERS=LC://kafka:29092,LX://${DOCKER_HOST_IP:-localhost}:9092
+#      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=LC:PLAINTEXT,LX:PLAINTEXT
+#      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=LC
+#    depends_on:
+#      - zookeeper
+
+#  kafka-ui:
+#    image: provectuslabs/kafka-ui
+#    container_name: kafka-ui
+#    networks:
+#      - myMsaPayment_network
+#    ports:
+#      - "8989:8080"
+#    restart: always
+#    depends_on:
+#      - kafka
+#      - zookeeper
+#    environment:
+#      - KAFKA_CLUSTERS_0_NAME=local
+#      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:29092
+#      - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
+
+  mysql:
+    image: mysql:8.0
+    container_name: mymsapayment-mysql
+    networks:
+      - mymsapayment_network
+    volumes:
+      - ./db/conf.d:/etc/mysql/conf.d
+      - ./db/data:/var/lib/mysql
+      - ./db/initdb.d:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
+    environment:
+      - TZ=Asia/Seoul
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_USER=mysqluser
+      - MYSQL_PASSWORD=mysqlpw
+      - MYSQL_DATABASE=myMsaPayment
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u mysqluser -pmysqlpw || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+#  axon-server:
+#    container_name: axon-server
+#    image: axoniq/axonserver:4.6.3-jdk-11-dev
+#    networks:
+#      - mymsapayment_network
+#    ports:
+#      - "8024:8024"
+#      - "8124:8124"
+#    volumes:
+#      - axonserver-data:/axonserver/data
+#      - axonserver-events:/axonserver/events
+#      - axonserver-config:/axonserver/config:ro
+
+  membership-service:
+    image: membership_service:1.0.3-SNAPSHOT
+    networks:
+      - mymsapayment_network
+    ports:
+      - "8081:8080"
+    depends_on:
+      - mysql
+    environment:
+      - AXON_AXONSERVER_SERVERS=axon-server:8124
+      - AXON_SERIALIZER_EVENTS=jackson
+      - AXON_SERIALIZER_MESSAGES=jackson
+      - AXON_SERIALIZER_GENERAL=xstream
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/myMsaPayment?useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=mysqluser
+      - SPRING_DATASOURCE_PASSWORD=mysqlpw
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQL8Dialect
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  axonserver-data:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ${PWD}/axon-server-se/data
+  axonserver-events:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ${PWD}/axon-server-se/events
+  axonserver-config:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ${PWD}/axon-server-se/config
+
+networks:
+  mymsapayment_network:
+    driver: bridge

@@ -3,18 +3,26 @@ plugins {
     id 'org.springframework.boot' version '3.1.0'
     id 'io.spring.dependency-management' version '1.1.0'
     id 'application'
+    id 'com.bmuschko.docker-java-application' version '9.3.2'
 }
 
 application {
-    mainClass = 'com.myMsaPayment.MembershipMain'
+    mainClass = 'com.mymsapayment.MembershipMain'
 }
 
 tasks.named('bootJar') {
-    mainClass = 'com.myMsaPayment.MembershipMain'
+    archiveFileName.set("membership_service.jar") // 빌드된 JAR 파일 이름 설정
+    manifest {
+        attributes 'Main-Class': 'com.mymsapayment.MembershipMain'
+    }
 }
 
-group = 'com.myMsaPayment'
-version = '1.0-SNAPSHOT'
+springBoot {
+    mainClass = 'com.mymsapayment.MembershipMain'
+}
+
+group = 'com.mymsapayment'
+version = '1.0.3-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -27,11 +35,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.projectlombok:lombok:1.18.28'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
-    implementation project(path: ':common')
+    implementation project(':common')
     annotationProcessor 'org.projectlombok:lombok:1.18.28'
 
-    runtimeOnly 'com.h2database:h2:2.2.222'
-
+    //runtimeOnly 'com.h2database:h2:2.2.222'
+    runtimeOnly 'mysql:mysql-connector-java:8.0.33'
     testImplementation platform('org.junit:junit-bom:5.9.1')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
@@ -39,3 +47,25 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+//docker {
+//    println(tasks.bootJar.outputs.files)
+//    name rootProject.name+'-'+project.name+':'+version
+//    dockerCreateDockerfile('./Dockerfile')
+//    files tasks.bootJar.outputs.files
+//    buildArgs(['JAR_FILE':tasks.bootJar.outputs.files.singleFile.name])
+//}
+
+
+
+docker {
+    javaApplication {
+        baseImage = 'eclipse-temurin:17-jdk' // Docker 이미지 생성 시 사용하는 기본 이미지(base image)
+        maintainer = 'Your Name <hdh89900@gamil.com>' // 메인테이너 정보
+        ports = [8080] // 컨테이너 노출 포트
+        jvmArgs = ['-Dspring.profiles.active=prod'] // Docker 컨테이너 내에서 실행되는 JVM(Java Virtual Machine)에 전달할 명령줄 인자(JVM 옵션)를 정의합니다.
+                                                    // 여기서는 Spring Boot의 활성 프로파일을 prod(production)로 설정합니다.
+        images = ["${project.name}:${project.version}"] // 생성될 Docker 이미지의 이름과 태그를 정의
+    }
+}
+
